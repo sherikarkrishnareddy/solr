@@ -1,0 +1,10 @@
+docker pull solr
+dockers images ps
+docker run -d -p 127.0.0.1:8000:8983 solr
+
+Macbooks-MBP:~ macbook$ docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                      NAMES
+7f17dc05f4ae   solr      "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   127.0.0.1:8000->8983/tcp   tender_saha
+Macbooks-MBP:~ macbook$ 
+
+docker exec -it 7f17dc05f4ae /bin/sh
