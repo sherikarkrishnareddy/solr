@@ -1,10 +1,189 @@
 docker pull solr
 dockers images ps
-docker run -d -p 127.0.0.1:8000:8983 solr
-
+Macbooks-MBP:~ macbook$ docker run -d -p 127.0.0.1:8000:8983 solr
+3bcf18e64aa83a74ef5e810699eaed74099c13fc6965df1399fa8d4bdb7c091e
 Macbooks-MBP:~ macbook$ docker ps
 CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                      NAMES
-7f17dc05f4ae   solr      "docker-entrypoint.s…"   9 minutes ago   Up 9 minutes   127.0.0.1:8000->8983/tcp   tender_saha
+3bcf18e64aa8   solr      "docker-entrypoint.s…"   6 seconds ago   Up 6 seconds   127.0.0.1:8000->8983/tcp   charming_noyce
 Macbooks-MBP:~ macbook$ 
 
-docker exec -it 7f17dc05f4ae /bin/sh
+#running Docker as a root user
+docker exec -u 0 -it 3bcf18e64aa8 /bin/sh
+
+# pwd
+/opt/solr-8.9.0/bin
+# ./solr status
+
+Found 1 Solr nodes: 
+
+Solr process 13 running on port 8983
+{
+  "solr_home":"/var/solr/data",
+  "version":"8.9.0 05c8a6f0163fe4c330e93775e8e91f3ab66a3f80 - mayyasharipova - 2021-06-10 17:54:40",
+  "startTime":"2021-09-10T11:30:57.170Z",
+  "uptime":"0 days, 0 hours, 2 minutes, 23 seconds",
+  "memory":"35 MB (%6.8) of 512 MB"}
+
+# 
+# ./solr create -c book
+WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use.
+         To turn off: bin/solr config -c book -p 8983 -action set-user-property -property update.autoCreateFields -value false
+WARNING: Creating cores as the root user can cause Solr to fail and is not advisable. Exiting.
+         If you started Solr as root (not advisable either), force core creation by adding argument -force
+# 
+
+# adduser dev
+Adding user `dev' ...
+Adding new group `dev' (1000) ...
+Adding new user `dev' (1000) with group `dev' ...
+Creating home directory `/home/dev' ...
+Copying files from `/etc/skel' ...
+New password: 
+Retype new password: 
+passwd: password updated successfully
+Changing the user information for dev
+Enter the new value, or press ENTER for the default
+	Full Name []: dev
+	Room Number []: 2
+	Work Phone []: 2021
+	Home Phone []: 2021
+	Other []: 
+Is the information correct? [Y/n] y
+#
+
+#Adding user dev to sudoers list 
+
+# usermod -aG sudo dev  
+#
+
+# apt-get install sudo
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package sudo
+# apt-get update
+Get:1 http://deb.debian.org/debian bullseye InRelease [113 kB]                 
+Get:2 http://security.debian.org/debian-security bullseye-security InRelease [44.1 kB]
+Get:3 http://security.debian.org/debian-security bullseye-security/main amd64 Packages [31.1 kB]
+Get:4 http://deb.debian.org/debian bullseye-updates InRelease [36.8 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 Packages [8178 kB]
+Fetched 8402 kB in 12s (696 kB/s)                                              
+Reading package lists... Done
+# apt-get install sudo
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following NEW packages will be installed:
+  sudo
+0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+Need to get 1059 kB of archives.
+After this operation, 4699 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian bullseye/main amd64 sudo amd64 1.9.5p2-3 [1059 kB]
+Fetched 1059 kB in 1s (801 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package sudo.
+(Reading database ... 8212 files and directories currently installed.)
+Preparing to unpack .../sudo_1.9.5p2-3_amd64.deb ...
+Unpacking sudo (1.9.5p2-3) ...
+Setting up sudo (1.9.5p2-3) ...
+invoke-rc.d: could not determine current runlevel
+invoke-rc.d: policy-rc.d denied execution of start.
+# sudo su dev
+dev@3bcf18e64aa8:/opt/solr-8.9.0/bin$ ./solr 
+
+dev@3bcf18e64aa8:/opt/solr$ bin/solr create -c book
+Java not found, or an error was encountered when running java.
+A working Java 8 JRE is required to run Solr!
+Please install latest version of Java 8 or set JAVA_HOME properly.
+Command that we tried: 'java -version', with response:
+bin/solr: line 139: java: command not found
+
+Debug information:
+JAVA_HOME: N/A
+Active Path:
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+dev@3bcf18e64aa8:/opt/solr$ sudo bin/solr create -c book
+Java not found, or an error was encountered when running java.
+A working Java 8 JRE is required to run Solr!
+Please install latest version of Java 8 or set JAVA_HOME properly.
+Command that we tried: 'java -version', with response:
+bin/solr: line 139: java: command not found
+
+Debug information:
+JAVA_HOME: N/A
+Active Path:
+/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+dev@3bcf18e64aa8:/opt/solr$ java --version
+bash: java: command not found
+dev@3bcf18e64aa8:/opt/solr$ java
+bash: java: command not found
+
+
+dev@3bcf18e64aa8:/opt/solr$ whereis jdk
+jdk:
+dev@3bcf18e64aa8:/opt/solr$ cd /
+dev@3bcf18e64aa8:/$ whereis jdk
+jdk:
+dev@3bcf18e64aa8:/opt/solr$ sudo add-apt-repository -y ppa:openjdk-r/ppa
+dev@3bcf18e64aa8:/$ sudo apt install -y default-jre
+
+
+Macbooks-MBP:~ macbook$ docker commit 3bcf18e64aa8 solr-dev
+sha256:e96e930a13171b6a809c4d5c9d840e4a992eb5e073dd8cca06f1b819e938f6d3
+Macbooks-MBP:~ macbook$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED         SIZE
+solr-dev     latest    e96e930a1317   7 seconds ago   1.24GB
+solr         latest    9282c926ee20   6 days ago      546MB
+Macbooks-MBP:~
+
+
+Macbooks-MBP:~ macbook$ docker run --user dev -d -p 127.0.0.1:8000:8983 solr-dev
+18a91177e7ba54d0e7e68bafea25efd11af878f73dc1937029a7a5eebffd85c4
+
+Macbooks-MBP:~ macbook$ docker run --user dev  -p 127.0.0.1:8000:8983 solr-dev
+Creating /var/solr/data
+Cannot write to /var/solr as 1000:1000
+drwxrwx--- 4 solr root 4096 Sep 10 13:42 /var/solr
+Macbooks-MBP:~ macbook$ docker start 6c375f662be5
+6c375f662be5
+Macbooks-MBP:~ macbook$ docker exec  -it 6c375f662be5 /bin/sh
+# chown -R dev:root /var/solr   
+# 
+Macbooks-MBP:~ macbook$ docker commit 6c375f662be5 solr-dev 
+sha256:35824087b5c5feb174c927db69736211e787506d68e90fdf2c0146c81ba99b3b
+Macbooks-MBP:~ macbook$ 
+
+
+this worked for me , 
+
+
+Macbooks-MBP:~ macbook$ docker images
+REPOSITORY   TAG       IMAGE ID       CREATED      SIZE
+solr         latest    9282c926ee20   6 days ago   546MB
+Macbooks-MBP:~ macbook$ docker run --user solr -d -p 127.0.0.1:8000:8983 solr
+3fe1cdd37d8d35e33dd70f62fc4eb19d535d8d4c59168019c93435728fab7122
+Macbooks-MBP:~ macbook$ docker ps
+CONTAINER ID   IMAGE     COMMAND                  CREATED         STATUS         PORTS                      NAMES
+3fe1cdd37d8d   solr      "docker-entrypoint.s…"   4 seconds ago   Up 2 seconds   127.0.0.1:8000->8983/tcp   confident_khorana
+Macbooks-MBP:~ macbook$ docker exec -it 3fe1cdd37d8d /bin/bash
+solr@3fe1cdd37d8d:/opt/solr-8.9.0$ cd bin/
+solr@3fe1cdd37d8d:/opt/solr-8.9.0/bin$ ls -lart
+total 236
+-rwxr-xr-x 1 root root 12652 Jun 10 20:23 solr.in.sh.orig
+-rwxr-xr-x 1 root root 11384 Jun 10 20:23 solr.in.cmd.orig
+-rwxr-xr-x 1 root root 76281 Jun 10 20:23 solr.cmd
+-rwxr-xr-x 1 root root  1513 Jun 10 20:23 postlogs
+-rwxr-xr-x 1 root root  8209 Jun 10 20:23 post
+-rwxr-xr-x 1 root root  1508 Jun 10 20:23 oom_solr.sh
+-rwxr-xr-x 1 root root 12694 Jun 10 20:23 install_solr_service.sh
+drwxr-xr-x 2 root root  4096 Sep  4 12:31 init.d
+-rwxr-xr-x 1 root root 85965 Sep  4 12:31 solr
+drwxr-xr-x 8 root root  4096 Sep  4 12:31 ..
+drwxr-xr-x 3 root root  4096 Sep  4 12:31 .
+solr@3fe1cdd37d8d:/opt/solr-8.9.0/bin$ ./solr create -c book
+WARNING: Using _default configset with data driven schema functionality. NOT RECOMMENDED for production use.
+         To turn off: bin/solr config -c book -p 8983 -action set-user-property -property update.autoCreateFields -value false
+
+Created new core 'book'
+solr@3fe1cdd37d8d:/opt/solr-8.9.0/bin$ 
+
